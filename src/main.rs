@@ -1,32 +1,19 @@
-use std::{
-    path::{Path, PathBuf},
-    process::exit,
-};
+mod utils;
+
+use std::{path::PathBuf, process::exit};
 
 fn main() {
-    let args: Vec<_> = std::env::args().collect();
-    if args.len() != 2 {
-        println!("Usage: bonsai [path]");
-        exit(1);
-    }
-    if args[1] == "--help" {
-        println!("Usage: bonsai [path]");
-        exit(0);
-    }
-    let Ok(dir) = Path::new(&args[1]).canonicalize() else {
-        eprintln!("please provide a valid directory path.");
-        exit(1);
+    let root = match utils::validate_and_get_directory_from_args() {
+        Ok(dir) => dir,
+        Err(err) => {
+            eprintln!("{}", err);
+            exit(1);
+        }
     };
-    if !dir.is_dir() {
-        eprintln!("please provide a valid directory path.");
-        exit(1);
-    }
-
-    let root = dir;
     let mut stack: Vec<(PathBuf, i32)> = vec![(root, 0)];
     while let Some((node, depth)) = stack.pop() {
         // pipe diagram symbols;  ─ ├ └ │
-        let mut prefix = String::new();
+        let prefix: String;
         if depth == 0 {
             prefix = String::from(".");
         } else if stack.len() > 0 {
