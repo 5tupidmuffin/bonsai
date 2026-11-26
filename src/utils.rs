@@ -1,5 +1,5 @@
 use std::{
-    collections::BTreeMap,
+    collections::HashMap,
     path::{Path, PathBuf},
 };
 
@@ -23,7 +23,7 @@ pub fn validate_and_get_directory_from_args() -> Result<PathBuf, (String, i32)> 
 pub fn create_prefix(
     current_depth: i32,
     stack: &mut Vec<(PathBuf, i32)>,
-    depth_map: &mut BTreeMap<i32, bool>,
+    depth_map: &mut HashMap<i32, bool>,
 ) -> String {
     // pipe diagram symbols;  ─ ├ └ │
     let mut prefix = String::new();

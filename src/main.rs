@@ -1,6 +1,6 @@
 mod utils;
 
-use std::{collections::BTreeMap, path::PathBuf, process::exit};
+use std::{collections::HashMap, path::PathBuf, process::exit};
 
 fn main() {
     let root = match utils::validate_and_get_directory_from_args() {
@@ -10,8 +10,10 @@ fn main() {
             exit(exit_code);
         }
     };
+
+    // DFS with depth tracking
     let mut stack: Vec<(PathBuf, i32)> = vec![(root, 0)];
-    let mut depth_map: BTreeMap<i32, bool> = BTreeMap::new();
+    let mut depth_map: HashMap<i32, bool> = HashMap::new();
     while let Some((node, depth)) = stack.pop() {
         println!(
             "{}{}",
