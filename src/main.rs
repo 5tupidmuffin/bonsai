@@ -1,6 +1,6 @@
 mod utils;
 
-use std::{collections::BTreeMap, path::PathBuf, process::exit};
+use std::{collections::BTreeMap, path::PathBuf, process::exit, thread::current};
 
 fn create_prefix(
     current_node: &PathBuf,
@@ -15,16 +15,16 @@ fn create_prefix(
     }
     depth_map.insert(current_depth, true);
     let pipe_symbol = if stack.len() > 0 && stack.last().unwrap().1 == current_depth {
-        "├"
+        "├─── "
     } else {
         depth_map.remove(&current_depth);
-        "└"
+        "└─── "
     };
-    for i in 0..current_depth {
+    for i in 1..current_depth {
         if depth_map.contains_key(&i) {
-            prefix += "│"
+            prefix += "│    "
         } else {
-            prefix += "   "
+            prefix += "     "
         }
     }
     prefix += pipe_symbol;
@@ -40,7 +40,7 @@ fn main() {
         }
     };
     let mut stack: Vec<(PathBuf, i32)> = vec![(root, 0)];
-    let mut depth_map = BTreeMap::new();
+    let mut depth_map: BTreeMap<i32, bool> = BTreeMap::new();
     while let Some((node, depth)) = stack.pop() {
         // pipe diagram symbols;  ─ ├ └ │
         println!(
