@@ -5,9 +5,9 @@ use std::{collections::BTreeMap, path::PathBuf, process::exit};
 fn main() {
     let root = match utils::validate_and_get_directory_from_args() {
         Ok(dir) => dir,
-        Err(err) => {
+        Err((err, exit_code)) => {
             eprintln!("{}", err);
-            exit(1);
+            exit(exit_code);
         }
     };
     let mut stack: Vec<(PathBuf, i32)> = vec![(root, 0)];
