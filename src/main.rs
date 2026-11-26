@@ -1,6 +1,35 @@
 mod utils;
 
-use std::{path::PathBuf, process::exit};
+use std::{collections::BTreeMap, path::PathBuf, process::exit};
+
+fn create_prefix(
+    current_node: &PathBuf,
+    current_depth: i32,
+    stack: &mut Vec<(PathBuf, i32)>,
+    depth_map: &mut BTreeMap<i32, bool>,
+) -> String {
+    let mut prefix = String::new();
+    if current_depth == 0 {
+        prefix = String::from(".");
+        return prefix;
+    }
+    depth_map.insert(current_depth, true);
+    let pipe_symbol = if stack.len() > 0 && stack.last().unwrap().1 == current_depth {
+        "├"
+    } else {
+        depth_map.remove(&current_depth);
+        "└"
+    };
+    for i in 0..current_depth {
+        if depth_map.contains_key(&i) {
+            prefix += "│"
+        } else {
+            prefix += "   "
+        }
+    }
+    prefix += pipe_symbol;
+    prefix
+}
 
 fn main() {
     let root = match utils::validate_and_get_directory_from_args() {
@@ -11,25 +40,12 @@ fn main() {
         }
     };
     let mut stack: Vec<(PathBuf, i32)> = vec![(root, 0)];
+    let mut depth_map = BTreeMap::new();
     while let Some((node, depth)) = stack.pop() {
         // pipe diagram symbols;  ─ ├ └ │
-        let prefix: String;
-        if depth == 0 {
-            prefix = String::from(".");
-        } else if stack.len() > 0 {
-            let next_node = stack.last().unwrap();
-            if next_node.1 == depth {
-                prefix = String::from(&format!("{}├── ", "    ".repeat(depth as usize - 1)));
-            } else {
-                prefix = String::from(&format!("{}└── ", "    ".repeat(depth as usize - 1)));
-            }
-        } else {
-            prefix = String::from(&format!("{}└── ", "    ".repeat(depth as usize - 1)));
-        }
-
         println!(
             "{}{}",
-            prefix,
+            create_prefix(&node, depth, &mut stack, &mut depth_map),
             node.file_name().unwrap().to_str().unwrap() // TODO: kinda sketchy, find a better way
         );
         if node.is_dir() {
