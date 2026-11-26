@@ -1,4 +1,7 @@
-use std::path::{Path, PathBuf};
+use std::{
+    collections::BTreeMap,
+    path::{Path, PathBuf},
+};
 
 pub fn validate_and_get_directory_from_args() -> Result<PathBuf, String> {
     let args: Vec<_> = std::env::args().collect();
@@ -15,4 +18,33 @@ pub fn validate_and_get_directory_from_args() -> Result<PathBuf, String> {
         return Err("please provide a valid directory path.".into());
     }
     Ok(dir)
+}
+
+pub fn create_prefix(
+    current_depth: i32,
+    stack: &mut Vec<(PathBuf, i32)>,
+    depth_map: &mut BTreeMap<i32, bool>,
+) -> String {
+    // pipe diagram symbols;  ─ ├ └ │
+    let mut prefix = String::new();
+    if current_depth == 0 {
+        prefix = String::from(".");
+        return prefix;
+    }
+    depth_map.insert(current_depth, true);
+    let pipe_symbol = if stack.len() > 0 && stack.last().unwrap().1 == current_depth {
+        "├─── "
+    } else {
+        depth_map.remove(&current_depth);
+        "└─── "
+    };
+    for i in 1..current_depth {
+        if depth_map.contains_key(&i) {
+            prefix += "│    "
+        } else {
+            prefix += "     "
+        }
+    }
+    prefix += pipe_symbol;
+    prefix
 }
